@@ -16,6 +16,17 @@ _GREETING_KEYWORDS = {
     "hello", "hi", "bye", "thanks", "thank you",
 }
 
+# 명백히 도메인 외 키워드 → LLM 없이 즉시 OOD 처리
+_OOD_KEYWORDS = {
+    "맛집", "식당", "카페", "음식", "요리", "레시피",
+    "날씨", "기온", "강수",
+    "여행", "숙소", "호텔", "관광",
+    "주식", "코인", "비트코인", "투자",
+    "스포츠", "야구", "축구", "농구",
+    "영화", "드라마", "연예인", "아이돌",
+    "게임", "롤", "lol", "minecraft",
+}
+
 _PROMPT = ChatPromptTemplate.from_messages([
     ("system", """당신은 공공사업 제안 전문 AI 어시스턴트의 질문 분류기입니다.
 사용자 질문을 분석하여 아래 정확한 JSON 형식으로만 응답하세요.
@@ -42,6 +53,16 @@ question_type 분류 기준:
 def formalizer_node(state: IFPState) -> IFPState:
     raw_q = state["raw_question"]
     raw_lower = raw_q.lower().strip()
+
+    # ── 명백한 OOD 키워드 판정 (LLM 호출 없이)
+    if any(k in raw_lower for k in _OOD_KEYWORDS):
+        return {
+            **state,
+            "question_type": "ood",
+            "formalized_question": raw_q,
+            "search_queries": [],
+            "is_early_ood": True,
+        }
 
     # ── 빠른 인사 판정 (LLM 호출 없이)
     if any(k in raw_lower for k in _GREETING_KEYWORDS) and len(raw_q) < 30:
