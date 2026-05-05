@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>아카이브 — I&FP</title>
+<link rel="stylesheet" href="/static/style.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Pretendard:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+
+<div class="orb orb-1"></div>
+<div class="orb orb-2"></div>
+<div class="orb orb-3"></div>
+
+<header>
+  <div class="nav-inner">
+    <div class="brand">
+      <img src="/static/images/company-logo.png" alt="데이터누리" class="logo">
+      <span class="brand-divider"></span>
+      <span class="brand-system">I&FP</span>
+    </div>
+    <nav>
+      <a href="/">제안 어시스턴트</a>
+      <a href="#" id="navAnnounceLink">공고 수집</a>
+      <a href="/archive" class="active">아카이브</a>
+      <a href="#">설정</a>
+    </nav>
+    <div class="nav-actions">
+      <button class="btn-primary" onclick="location.href='/'">메인으로</button>
+    </div>
+  </div>
+</header>
+
+<main class="archive-main">
+
+  <!-- 통계 바 -->
+  <section class="arc-stats-bar">
+    <div class="arc-stat">
+      <span class="arc-stat-num" id="statFiles">—</span>
+      <span class="arc-stat-label">학습 문서</span>
+    </div>
+    <div class="arc-stat-div"></div>
+    <div class="arc-stat">
+      <span class="arc-stat-num" id="statSummary">—</span>
+      <span class="arc-stat-label">개요 청크</span>
+    </div>
+    <div class="arc-stat-div"></div>
+    <div class="arc-stat">
+      <span class="arc-stat-num" id="statDetail">—</span>
+      <span class="arc-stat-label">세부 청크</span>
+    </div>
+  </section>
+
+  <!-- 업로드 존 -->
+  <section class="arc-upload-zone" id="uploadZone">
+    <div class="arc-upload-inner" id="uploadInner">
+      <div class="arc-upload-icon">📂</div>
+      <p class="arc-upload-title">파일을 여기에 드래그하거나 클릭하여 업로드</p>
+      <p class="arc-upload-sub">HWP · HWPX · PDF · DOCX · PPTX · PPT · XLSX · XLS · TXT · MD · ZIP</p>
+      <input type="file" id="fileInput" multiple
+             accept=".hwp,.hwpx,.pdf,.docx,.pptx,.ppt,.xlsx,.xls,.txt,.md,.zip"
+             style="display:none">
+    </div>
+    <!-- 업로드 진행 목록 -->
+    <div class="arc-upload-queue" id="uploadQueue" style="display:none"></div>
+  </section>
+
+  <!-- 파일 목록 -->
+  <section class="arc-files-section">
+    <div class="arc-files-header">
+      <h2 class="arc-files-title">문서 아카이브</h2>
+      <div class="arc-files-controls">
+        <div class="arc-search-wrap">
+          <input type="text" id="searchQ" placeholder="파일명 검색" class="arc-search-input">
+        </div>
+        <select id="filterExt" class="arc-select">
+          <option value="">전체 형식</option>
+          <option value=".hwp">HWP</option>
+          <option value=".hwpx">HWPX</option>
+          <option value=".pdf">PDF</option>
+          <option value=".docx">DOCX</option>
+          <option value=".pptx">PPTX</option>
+          <option value=".ppt">PPT</option>
+          <option value=".xlsx">XLSX</option>
+          <option value=".txt">TXT</option>
+        </select>
+        <span class="arc-total-count" id="arcTotalCount"></span>
+      </div>
+    </div>
+
+    <div class="arc-table-wrap">
+      <table class="arc-table">
+        <thead>
+          <tr>
+            <th style="width:40%">파일명</th>
+            <th style="width:8%">형식</th>
+            <th style="width:10%">크기</th>
+            <th style="width:12%">수정일</th>
+            <th style="width:10%">경로</th>
+            <th style="width:10%">인덱싱</th>
+          </tr>
+        </thead>
+        <tbody id="fileTableBody">
+          <tr><td colspan="6" class="arc-table-empty">로딩 중...</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- 페이지네이션 -->
+    <div class="arc-pagination" id="pagination"></div>
+  </section>
+
+</main>
+
+<footer>
+  <div class="footer-inner">
+    <div>© 2026 데이터누리 — I&FP System v0.1</div>
+    <div class="footer-links"><a href="/">메인</a><a href="/archive">아카이브</a></div>
+  </div>
+</footer>
+
+<!-- 파일 상세 모달 -->
+<div class="arc-modal-overlay" id="fileModal" style="display:none" onclick="closeFileModal(event)">
+  <div class="arc-modal" onclick="event.stopPropagation()">
+    <div class="arc-modal-header">
+      <div class="arc-modal-title" id="modalTitle">파일 상세</div>
+      <button class="arc-modal-close" onclick="closeModal()">✕</button>
+    </div>
+
+    <div class="arc-modal-body">
+      <!-- 인덱싱 상태 -->
+      <div class="arc-modal-section arc-modal-stats">
+        <div class="arc-mstat">
+          <span class="arc-mstat-num" id="modalSummary">—</span>
+          <span class="arc-mstat-label">개요 청크</span>
+        </div>
+        <div class="arc-mstat">
+          <span class="arc-mstat-num" id="modalDetail">—</span>
+          <span class="arc-mstat-label">세부 청크</span>
+        </div>
+      </div>
+
+      <!-- 추출 텍스트 미리보기 -->
+      <div class="arc-modal-section">
+        <div class="arc-modal-section-title">추출된 텍스트 미리보기</div>
+        <div class="arc-modal-preview" id="modalPreview">로딩 중...</div>
+      </div>
+
+      <!-- 보충 노트 -->
+      <div class="arc-modal-section">
+        <div class="arc-modal-section-title">
+          보충 노트
+          <span class="arc-modal-hint">— 검색에 포함될 추가 정보를 직접 입력할 수 있습니다</span>
+        </div>
+        <textarea class="arc-modal-notes" id="modalNotes"
+                  placeholder="이 문서에 대한 추가 설명, 핵심 키워드, 맥락 정보 등을 입력하세요.
+예) 이 문서는 2023년 인천공항공사 빅데이터 플랫폼 구축 ISP 용역 제안서입니다. 주요 키워드: AWS, 하둡, 실시간 분석, 데이터 레이크"></textarea>
+        <div class="arc-modal-actions">
+          <div class="arc-modal-msg" id="modalMsg"></div>
+          <button class="btn-primary" id="modalSaveBtn" onclick="saveNotes()">노트 저장 및 인덱싱</button>
+        </div>
+      </div>
+
+      <!-- 진단 섹션 -->
+      <div class="arc-modal-section">
+        <div class="arc-modal-section-title arc-modal-diag-toggle" onclick="toggleDiag()">
+          🔍 검색 진단 <span id="diagArrow">▼</span>
+        </div>
+        <div id="diagSection" style="display:none">
+          <div class="arc-modal-diag-desc">이 파일명으로 쿼리를 날렸을 때 실제 유사도 거리를 확인합니다.</div>
+          <div class="arc-diag-row">
+            <input type="text" class="arc-diag-input" id="diagQuery" placeholder="검색 쿼리 입력 (예: 인천공항 빅데이터 플랫폼)">
+            <button class="arc-diag-btn" onclick="runDiag()">진단</button>
+          </div>
+          <div class="arc-diag-results" id="diagResults"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="/static/archive.js"></script>
+</body>
+</html>

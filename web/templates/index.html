@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>I&FP — Intelligence & Fast Proposal</title>
+<link rel="stylesheet" href="/static/style.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Pretendard:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+
+<!-- Floating glass orbs -->
+<div class="orb orb-1"></div>
+<div class="orb orb-2"></div>
+<div class="orb orb-3"></div>
+<div class="orb orb-4"></div>
+
+<header>
+  <div class="nav-inner">
+    <div class="brand">
+      <img src="/static/images/company-logo.png" alt="데이터누리" class="logo">
+      <span class="brand-divider"></span>
+      <span class="brand-system">I&FP</span>
+    </div>
+    <nav>
+      <a href="/" class="active" id="navAssist">제안 어시스턴트</a>
+      <a href="#" id="navAnnounce">공고 수집</a>
+      <a href="/rfp">RFP 분석</a>
+      <a href="/archive">아카이브</a>
+      <a href="#">설정</a>
+    </nav>
+    <div class="nav-actions">
+      <button class="btn-primary" id="newSessionBtn">새 세션</button>
+    </div>
+  </div>
+</header>
+
+<main>
+  <section class="hero">
+    <img src="/static/images/logo.png" alt="I&FP" class="hero-logo">
+    <p class="tagline">Intelligence &amp; Fast Proposal — AI 멀티에이전트 제안 어시스턴트</p>
+
+    <div class="search-card">
+      <div class="search-row">
+        <input id="question" type="text"
+               placeholder="예) 우리 회사가 지원할 수 있는 빅데이터 사업 사례를 알려줘"
+               autocomplete="off">
+        <button id="askBtn">질문하기</button>
+      </div>
+      <div class="quick-tags">
+        <button class="tag" data-q="우리 회사의 과거 빅데이터 플랫폼 구축 사례를 알려줘">빅데이터 사례</button>
+        <button class="tag" data-q="AI 학습용 데이터 구축 사업 경험을 정리해줘">AI 데이터</button>
+        <button class="tag" data-q="공공데이터 개방 사업 수행 실적을 알려줘">공공데이터</button>
+        <button class="tag" data-q="제안서 작성 시 강조할 우리 회사의 핵심 역량은?">핵심 역량</button>
+        <button class="tag" data-q="2025년 수행한 사업 목록을 정리해줘">최근 사업</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Pipeline status -->
+  <section class="pipeline" id="pipeline" style="display:none;">
+    <div class="pipeline-inner">
+      <div class="pipe-step" data-node="formalizer">
+        <div class="pipe-num">1</div><div class="pipe-name">질문 정식화</div>
+      </div>
+      <div class="pipe-step" data-node="planner">
+        <div class="pipe-num">2</div><div class="pipe-name">검색 계획</div>
+      </div>
+      <div class="pipe-step" data-node="retrieval">
+        <div class="pipe-num">3</div><div class="pipe-name">문서 검색</div>
+      </div>
+      <div class="pipe-step" data-node="generator">
+        <div class="pipe-num">4</div><div class="pipe-name">답변 생성</div>
+      </div>
+      <div class="pipe-step" data-node="review">
+        <div class="pipe-num">5</div><div class="pipe-name">자기 검토</div>
+      </div>
+      <div class="pipe-step" data-node="final">
+        <div class="pipe-num">6</div><div class="pipe-name">최종 정리</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Answer -->
+  <section class="answer-section" id="answerSection" style="display:none;">
+    <div class="answer-card">
+      <div class="answer-meta">
+        <span class="meta-tag" id="metaType">—</span>
+        <span class="meta-tag" id="metaIter">—</span>
+      </div>
+      <div class="answer-body" id="answerBody"></div>
+    </div>
+  </section>
+
+  <!-- Feature cards -->
+  <section class="features">
+    <div class="feature-card">
+      <div class="feature-icon">📊</div>
+      <h3>RFP 분석</h3>
+      <p>공고 문서 자동 분석<br>핵심 요건 추출</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">📝</div>
+      <h3>제안서 초안</h3>
+      <p>섹션별 자동 작성<br>Reflexion 자기 검토</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">🎯</div>
+      <h3>역량 매칭</h3>
+      <p>회사 프로파일 기반<br>레퍼런스 80건+ 활용</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">🔍</div>
+      <h3>아카이브 검색</h3>
+      <p>1,338건 과거 사례<br>MMR 의미 검색</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">🏆</div>
+      <h3>실적 기반</h3>
+      <p>NIA 핵심 파트너<br>조달청 3자단가 유일</p>
+    </div>
+  </section>
+
+  <!-- Announcements panel -->
+  <section class="announce-panel" id="announcePanel" style="display:none;">
+    <div class="announce-header">
+      <h2 class="announce-title">수집 공고</h2>
+      <div class="announce-header-right">
+        <span class="announce-count" id="announceCount">—</span>
+        <button class="btn-collect-panel" id="collectBtn">공고 수집</button>
+      </div>
+    </div>
+
+    <!-- 필터 바 -->
+    <div class="ann-filter-bar">
+      <div class="ann-filter-row">
+        <div class="ann-filter-field ann-filter-search">
+          <label>키워드</label>
+          <input type="text" id="filterQ" placeholder="공고명 검색">
+        </div>
+        <div class="ann-filter-field ann-filter-org">
+          <label>발주처</label>
+          <input type="text" id="filterOrg" placeholder="공고기관·수요기관">
+        </div>
+        <div class="ann-filter-field">
+          <label>공고일 시작</label>
+          <input type="date" id="filterDateFrom">
+        </div>
+        <div class="ann-filter-field">
+          <label>공고일 종료</label>
+          <input type="date" id="filterDateTo">
+        </div>
+        <div class="ann-filter-field">
+          <label>최소 예산(만원)</label>
+          <input type="number" id="filterMinBudget" placeholder="예) 3000" min="0" step="100">
+        </div>
+        <div class="ann-filter-actions">
+          <button class="btn-filter-apply" id="filterApplyBtn">검색</button>
+          <button class="btn-filter-reset" id="filterResetBtn">초기화</button>
+        </div>
+      </div>
+      <div class="ann-filter-tags">
+        <span class="ann-ftag" data-q="빅데이터">빅데이터</span>
+        <span class="ann-ftag" data-q="AI">AI·인공지능</span>
+        <span class="ann-ftag" data-q="플랫폼">플랫폼</span>
+        <span class="ann-ftag" data-q="공공데이터">공공데이터</span>
+        <span class="ann-ftag" data-q="데이터 구축">데이터 구축</span>
+        <span class="ann-ftag" data-q="스마트">스마트</span>
+        <span class="ann-ftag" data-q="클라우드">클라우드</span>
+        <span class="ann-ftag" data-q="디지털트윈">디지털트윈</span>
+      </div>
+    </div>
+
+    <div class="announce-list" id="announceList">
+      <p class="announce-empty">공고 수집 버튼을 눌러 최신 공고를 가져오세요.</p>
+    </div>
+  </section>
+
+  <!-- Company info strip -->
+  <section class="company-strip">
+    <div class="company-stat"><span class="stat-num">80+</span><span class="stat-label">공공 레퍼런스</span></div>
+    <div class="company-divider"></div>
+    <div class="company-stat"><span class="stat-num" id="docCount">1,338</span><span class="stat-label">학습 문서</span></div>
+    <div class="company-divider"></div>
+    <div class="company-stat"><span class="stat-num">7년</span><span class="stat-label">데이터 전문</span></div>
+    <div class="company-divider"></div>
+    <div class="company-stat"><span class="stat-num">22%</span><span class="stat-label">연평균 성장률</span></div>
+    <div class="company-divider"></div>
+    <div class="company-stat"><span class="stat-num">국내 유일</span><span class="stat-label">조달청 3자단가</span></div>
+  </section>
+</main>
+
+<footer>
+  <div class="footer-inner">
+    <div>© 2026 데이터누리 — I&FP System v0.1</div>
+    <div class="footer-links">
+      <a href="#">문서</a>
+      <a href="#">파이프라인</a>
+      <a href="#">설정</a>
+    </div>
+  </div>
+</footer>
+
+<script src="/static/app.js"></script>
+</body>
+</html>

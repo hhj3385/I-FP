@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RFP 분석 — I&FP</title>
+<link rel="stylesheet" href="/static/style.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Pretendard:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+
+<div class="orb orb-1"></div>
+<div class="orb orb-2"></div>
+<div class="orb orb-3"></div>
+
+<header>
+  <div class="nav-inner">
+    <div class="brand">
+      <img src="/static/images/company-logo.png" alt="데이터누리" class="logo">
+      <span class="brand-divider"></span>
+      <span class="brand-system">I&FP</span>
+    </div>
+    <nav>
+      <a href="/">제안 어시스턴트</a>
+      <a href="/rfp" class="active">RFP 분석</a>
+      <a href="/archive">아카이브</a>
+      <a href="#">설정</a>
+    </nav>
+    <div class="nav-actions">
+      <button class="btn-primary" onclick="location.href='/'">메인으로</button>
+    </div>
+  </div>
+</header>
+
+<main class="rfp-main">
+
+  <!-- 페이지 타이틀 -->
+  <div class="rfp-page-header">
+    <h1 class="rfp-page-title">RFP 분석</h1>
+    <p class="rfp-page-sub">제안요청서를 업로드하면 AI가 핵심 요건을 추출하고 역량 매칭까지 자동으로 수행합니다</p>
+  </div>
+
+  <!-- 업로드 존 -->
+  <section class="rfp-upload-zone" id="uploadZone">
+    <div class="rfp-upload-inner" id="uploadInner">
+      <div class="rfp-upload-icon">📄</div>
+      <p class="rfp-upload-title">RFP 파일을 여기에 드래그하거나 클릭하여 업로드</p>
+      <p class="rfp-upload-sub">HWP · HWPX · PDF · DOCX · PPTX · TXT 지원</p>
+      <input type="file" id="rfpFileInput"
+             accept=".hwp,.hwpx,.pdf,.docx,.pptx,.ppt,.txt"
+             style="display:none">
+    </div>
+  </section>
+
+  <!-- 분석 진행 상태 -->
+  <section class="rfp-progress-section" id="progressSection" style="display:none">
+    <div class="rfp-progress-bar">
+      <div class="rfp-prog-step" id="prog-save">
+        <div class="rfp-prog-dot"></div>
+        <span>파일 저장</span>
+      </div>
+      <div class="rfp-prog-line"></div>
+      <div class="rfp-prog-step" id="prog-extract">
+        <div class="rfp-prog-dot"></div>
+        <span>텍스트 추출</span>
+      </div>
+      <div class="rfp-prog-line"></div>
+      <div class="rfp-prog-step" id="prog-analyze">
+        <div class="rfp-prog-dot"></div>
+        <span>RFP 분석</span>
+      </div>
+      <div class="rfp-prog-line"></div>
+      <div class="rfp-prog-step" id="prog-review">
+        <div class="rfp-prog-dot"></div>
+        <span>품질 검토</span>
+      </div>
+      <div class="rfp-prog-line rfp-prog-line--opt" id="prog-line-refine"></div>
+      <div class="rfp-prog-step rfp-prog-step--opt" id="prog-refine">
+        <div class="rfp-prog-dot"></div>
+        <span>개선</span>
+      </div>
+    </div>
+    <p class="rfp-progress-msg" id="progressMsg">분석 준비 중...</p>
+  </section>
+
+  <!-- 분석 결과 -->
+  <section class="rfp-result-section" id="resultSection" style="display:none">
+    <div class="rfp-result-header">
+      <h2 class="rfp-result-title">분석 결과</h2>
+      <span class="rfp-filename-badge" id="resultFilename"></span>
+    </div>
+
+    <!-- 상단 요약 카드 -->
+    <div class="rfp-overview-grid" id="overviewGrid"></div>
+
+    <!-- 요구사항 카드 그리드 -->
+    <div class="rfp-cards-grid" id="cardsGrid"></div>
+
+    <!-- 키워드 -->
+    <div class="rfp-keywords-section" id="keywordsSection" style="display:none">
+      <p class="rfp-kw-label">핵심 키워드</p>
+      <div class="rfp-kw-tags" id="kwTags"></div>
+    </div>
+
+    <!-- 역량 매칭 실행 버튼 -->
+    <div class="rfp-match-trigger">
+      <button class="btn-match" id="matchBtn">역량 매칭 분석 시작</button>
+      <p class="rfp-match-hint">추출된 요구사항을 기반으로 우리 회사 레퍼런스와 매칭합니다</p>
+    </div>
+  </section>
+
+  <!-- 역량 매칭 결과 -->
+  <section class="rfp-match-section" id="matchSection" style="display:none">
+    <div class="rfp-result-header">
+      <h2 class="rfp-result-title">역량 매칭 보고서</h2>
+    </div>
+
+    <!-- 매칭 진행 (LangGraph 파이프라인 스텝) -->
+    <div class="rfp-match-progress" id="matchProgress">
+      <div class="rfp-progress-bar rfp-match-prog-bar">
+        <div class="rfp-prog-step" id="mprog-match">
+          <div class="rfp-prog-dot"></div>
+          <span>매칭 분석</span>
+        </div>
+        <div class="rfp-prog-line"></div>
+        <div class="rfp-prog-step" id="mprog-review">
+          <div class="rfp-prog-dot"></div>
+          <span>보고서 검토</span>
+        </div>
+        <div class="rfp-prog-line rfp-prog-line--opt" id="mprog-line-refine"></div>
+        <div class="rfp-prog-step rfp-prog-step--opt" id="mprog-refine">
+          <div class="rfp-prog-dot"></div>
+          <span>개선</span>
+        </div>
+      </div>
+      <p class="rfp-progress-msg" id="matchProgMsg">분석 중...</p>
+    </div>
+
+    <!-- 매칭 보고서 -->
+    <div class="rfp-match-body" id="matchBody" style="display:none"></div>
+
+    <!-- 매칭 출처 -->
+    <div class="rfp-match-sources" id="matchSources" style="display:none">
+      <p class="sources-title">참고 자료</p>
+      <ul class="sources-list" id="matchSourcesList"></ul>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  <div class="footer-inner">
+    <div>© 2026 데이터누리 — I&FP System v0.1</div>
+    <div class="footer-links"><a href="/">메인</a><a href="/rfp">RFP 분석</a><a href="/archive">아카이브</a></div>
+  </div>
+</footer>
+
+<script src="/static/rfp.js"></script>
+</body>
+</html>
