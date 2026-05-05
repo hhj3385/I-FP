@@ -1,16 +1,15 @@
 """
 STEP 5: Generator Node
 - 검색된 문서 + 회사 프로파일 + 질문 유형 + 이전 피드백을 종합하여 초안 생성
-- 현재: EXAONE 로컬 (Claude API 잔액 충전 후 use_claude=True로 전환)
 """
+import os
 from pathlib import Path
 from langchain_ollama import ChatOllama
 from langchain_core.prompts import ChatPromptTemplate
 from config.settings import settings
 from src.state import IFPState
 
-# Claude API 잔액 충전 후 True로 변경
-USE_CLAUDE = False
+USE_CLAUDE = os.getenv("GENERATOR_USE_CLAUDE", "false").lower() == "true"
 
 _PROFILE_PATH = Path(__file__).parent.parent.parent / "data" / "company_profile.md"
 _COMPANY_PROFILE: str | None = None
@@ -62,17 +61,17 @@ def _build_context(summary_docs: list, detail_docs: list) -> str:
     idx = 1
     if summary_docs:
         parts.append("## 개요 문서")
-        for d in summary_docs[:3]:
+        for d in summary_docs[:5]:
             src = (d.get("metadata") or {}).get("source", "")
             label = f"[문서 {idx}]" + (f" ({src})" if src else "")
-            parts.append(f"{label}\n{d['content'][:600]}")
+            parts.append(f"{label}\n{d['content'][:2000]}")
             idx += 1
     if detail_docs:
         parts.append("## 세부 문서")
-        for d in detail_docs[:5]:
+        for d in detail_docs[:8]:
             src = (d.get("metadata") or {}).get("source", "")
             label = f"[문서 {idx}]" + (f" ({src})" if src else "")
-            parts.append(f"{label}\n{d['content'][:300]}")
+            parts.append(f"{label}\n{d['content'][:500]}")
             idx += 1
     return "\n\n".join(parts)
 

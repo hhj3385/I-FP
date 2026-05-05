@@ -4,7 +4,7 @@ STEP 1: Formalizer Node
 - ood / greeting → is_early_ood = True → planner/retrieval 건너뛰고 final로 직행
 - 그 외 → 검색용 질문 정제 (formalized_question, search_queries)
 """
-from langchain_ollama import ChatOllama
+from langchain_anthropic import ChatAnthropic
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.output_parsers import JsonOutputParser
 from config.settings import settings
@@ -27,6 +27,15 @@ _OOD_KEYWORDS = {
     "게임", "롤", "lol", "minecraft",
 }
 
+# 회사 업무 관련 키워드 → LLM이 OOD로 잘못 분류해도 general로 보정
+_COMPANY_KEYWORDS = {
+    "사업", "프로젝트", "수주", "역량", "실적", "제안", "제안서",
+    "데이터누리", "회사", "아카이브", "공고", "입찰", "과업",
+    "빅데이터", "정보화", "공공데이터", "나라장터", "rfp", "rFP",
+    "인공지능", "플랫폼 구축", "시스템 구축", "데이터 구축",
+    "수행", "용역", "컨설팅", "nia", "NIA",
+}
+
 _PROMPT = ChatPromptTemplate.from_messages([
     ("system", """당신은 공공사업 제안 전문 AI 어시스턴트의 질문 분류기입니다.
 사용자 질문을 분석하여 아래 정확한 JSON 형식으로만 응답하세요.
@@ -34,7 +43,7 @@ _PROMPT = ChatPromptTemplate.from_messages([
 {{
   "question_type": "rfp_analysis | proposal_draft | company_match | general | ood | greeting 중 하나",
   "formalized_question": "검색에 최적화된 정제된 질문 (한 문장; ood·greeting이면 원문 그대로)",
-  "search_queries": ["쿼리1", "쿼리2", "쿼리3"]
+  "search_queries": ["쿼리1", "쿼리2", "쿼리3", "쿼리4", "쿼리5"]
 }}
 
 question_type 분류 기준:
@@ -74,8 +83,19 @@ def formalizer_node(state: IFPState) -> IFPState:
             "is_early_ood": True,
         }
 
+    # ── 회사 관련 키워드 → LLM 호출 없이 즉시 general 처리
+    if any(k in raw_lower for k in _COMPANY_KEYWORDS):
+        print(f"[FORMALIZER] 회사키워드 감지 → general (LLM 스킵): '{raw_q[:40]}'", flush=True)
+        return {
+            **state,
+            "question_type": "general",
+            "formalized_question": raw_q,
+            "search_queries": [raw_q],
+            "is_early_ood": False,
+        }
+
     # ── LLM 분류
-    llm = ChatOllama(model=settings.exaone_model, temperature=0, format="json")
+    llm = ChatAnthropic(model=settings.claude_model, api_key=settings.anthropic_api_key, temperature=0)
     parser = JsonOutputParser()
     chain = _PROMPT | llm | parser
 
@@ -107,10 +127,17 @@ def formalizer_node(state: IFPState) -> IFPState:
 
     is_early = qtype in ("ood", "greeting")
 
+    # LLM이 OOD로 분류했지만 회사 관련 키워드가 있으면 general로 보정
+    if is_early and qtype == "ood" and any(k in raw_lower for k in _COMPANY_KEYWORDS):
+        print(f"[FORMALIZER] OOD 보정: '{raw_q[:30]}' → general (회사키워드 감지)", flush=True)
+        qtype = "general"
+        is_early = False
+
+    print(f"[FORMALIZER] '{raw_q[:30]}' → type={qtype}, early={is_early}", flush=True)
     return {
         **state,
         "question_type": qtype,
         "formalized_question": str(formalized),
-        "search_queries": [str(q) for q in queries][:4],
+        "search_queries": [str(q) for q in queries][:5],
         "is_early_ood": is_early,
     }

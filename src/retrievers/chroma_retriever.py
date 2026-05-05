@@ -8,9 +8,21 @@ from langchain_ollama import OllamaEmbeddings
 from langchain_core.vectorstores import VectorStoreRetriever
 from config.settings import settings
 
+_collections: dict[str, Chroma] = {}
+
 
 def _get_embedding():
     return OllamaEmbeddings(model=settings.exaone_model)
+
+
+def _get_collection(collection_name: str) -> Chroma:
+    if collection_name not in _collections:
+        _collections[collection_name] = Chroma(
+            collection_name=collection_name,
+            persist_directory=settings.chroma_persist_dir,
+            embedding_function=_get_embedding(),
+        )
+    return _collections[collection_name]
 
 
 def _normalize_filter(filters: dict | None) -> dict | None:
@@ -35,35 +47,23 @@ def _build_search_kwargs(filters: dict | None) -> dict:
 
 
 def get_summary_retriever(filters: dict | None = None) -> VectorStoreRetriever:
-    db = Chroma(
-        collection_name=settings.summary_collection,
-        persist_directory=settings.chroma_persist_dir,
-        embedding_function=_get_embedding(),
-    )
+    db = _get_collection(settings.summary_collection)
     return db.as_retriever(search_type="mmr", search_kwargs=_build_search_kwargs(filters))
 
 
 def get_detail_retriever(filters: dict | None = None) -> VectorStoreRetriever:
-    db = Chroma(
-        collection_name=settings.detail_collection,
-        persist_directory=settings.chroma_persist_dir,
-        embedding_function=_get_embedding(),
-    )
+    db = _get_collection(settings.detail_collection)
     return db.as_retriever(search_type="mmr", search_kwargs=_build_search_kwargs(filters))
 
 
 def get_docs_with_scores(
     query: str,
     collection: str,
-    k: int = 5,
+    k: int = 10,
     filters: dict | None = None,
 ) -> list[tuple]:
     """similarity_search_with_score로 (Document, L2_distance) 쌍 반환."""
-    db = Chroma(
-        collection_name=collection,
-        persist_directory=settings.chroma_persist_dir,
-        embedding_function=_get_embedding(),
-    )
+    db = _get_collection(collection)
     kwargs: dict = {"k": k}
     f = _normalize_filter(filters)
     if f:

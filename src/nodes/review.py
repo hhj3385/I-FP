@@ -3,7 +3,7 @@ STEP 6: Review Node (Reflexion 패턴)
 - 생성된 답변의 반론 쿼리로 문서 재검색
 - 모순/부족 여부 판단 → 피드백 저장 후 루프 or 통과
 """
-from langchain_ollama import ChatOllama
+from langchain_anthropic import ChatAnthropic
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.output_parsers import JsonOutputParser
 from src.retrievers.chroma_retriever import get_detail_retriever
@@ -50,7 +50,7 @@ def _bool(val, default=False) -> bool:
 
 
 def review_node(state: IFPState) -> IFPState:
-    llm = ChatOllama(model=settings.exaone_model, temperature=0, format="json")
+    llm = ChatAnthropic(model=settings.claude_model, api_key=settings.anthropic_api_key, temperature=0)
     parser = JsonOutputParser()
 
     # 1단계: 반론 쿼리 생성

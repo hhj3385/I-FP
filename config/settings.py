@@ -23,8 +23,8 @@ class Settings(BaseSettings):
     embedding_model: str = "exaone3.5:7.8b"  # 절대 변경 금지 (DB 재생성 필요)
 
     # Retriever
-    mmr_k: int = 5
-    mmr_fetch_k: int = 20
+    mmr_k: int = 8
+    mmr_fetch_k: int = 40
     mmr_lambda: float = 0.6          # 다양성 vs 관련성 균형
 
     # RAG Loop
@@ -39,6 +39,10 @@ class Settings(BaseSettings):
         "데이터베이스", "정보화", "시스템 구축", "데이터 연계",
         "데이터 관리", "클라우드", "디지털", "스마트",
     ]
+
+    # 인증
+    app_username: str = "ifp"
+    app_password: str = ""
 
     # 경로
     raw_data_dir: str = str(BASE_DIR / "data" / "raw")
