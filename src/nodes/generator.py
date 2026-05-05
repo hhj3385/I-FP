@@ -86,13 +86,7 @@ def _get_llm():
             temperature=0.3,
             max_tokens=4096,
         )
-    # 32B Generator 모델 사용 (답변 품질 향상)
-    return ChatOllama(
-        model=settings.generator_model,
-        temperature=0.3,
-        num_ctx=8192,        # 컨텍스트 윈도우 확장
-        num_predict=2048,    # 답변 길이 여유
-    )
+    return ChatOllama(model=settings.exaone_model, temperature=0.3)
 
 
 def generator_node(state: IFPState) -> IFPState:
