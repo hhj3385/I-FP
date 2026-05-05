@@ -2,7 +2,7 @@
 STEP 3: Planner Node
 - 어떤 리트리버를 쓸지, 어떤 메타데이터 필터를 적용할지 결정
 """
-from langchain_anthropic import ChatAnthropic
+from langchain_ollama import ChatOllama
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.output_parsers import JsonOutputParser
 from config.settings import settings
@@ -37,7 +37,7 @@ _PROMPT = ChatPromptTemplate.from_messages([
 
 
 def planner_node(state: IFPState) -> IFPState:
-    llm = ChatAnthropic(model=settings.claude_model, api_key=settings.anthropic_api_key, temperature=0)
+    llm = ChatOllama(model=settings.exaone_model, temperature=0, format="json")
     parser = JsonOutputParser()
     chain = _PROMPT | llm | parser
 

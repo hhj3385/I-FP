@@ -4,7 +4,7 @@ STEP 1: Formalizer Node
 - ood / greeting → is_early_ood = True → planner/retrieval 건너뛰고 final로 직행
 - 그 외 → 검색용 질문 정제 (formalized_question, search_queries)
 """
-from langchain_anthropic import ChatAnthropic
+from langchain_ollama import ChatOllama
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.output_parsers import JsonOutputParser
 from config.settings import settings
@@ -95,7 +95,7 @@ def formalizer_node(state: IFPState) -> IFPState:
         }
 
     # ── LLM 분류
-    llm = ChatAnthropic(model=settings.claude_model, api_key=settings.anthropic_api_key, temperature=0)
+    llm = ChatOllama(model=settings.exaone_model, temperature=0, format="json")
     parser = JsonOutputParser()
     chain = _PROMPT | llm | parser
 
