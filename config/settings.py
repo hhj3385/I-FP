@@ -28,7 +28,7 @@ class Settings(BaseSettings):
     mmr_lambda: float = 0.6          # 다양성 vs 관련성 균형
 
     # RAG Loop
-    max_iterations: int = 3
+    max_iterations: int = 1
 
     # G2B 수집
     g2b_api_key: str = ""
