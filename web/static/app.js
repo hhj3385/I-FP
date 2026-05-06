@@ -191,6 +191,7 @@ const TYPE_LABELS = {
 };
 
 let threadId = null;
+let _lastFeedbackCtx = { question: "", answer: "", questionType: "" };
 
 // 빠른 태그 클릭
 document.querySelectorAll(".tag").forEach(tag => {
@@ -356,11 +357,17 @@ async function ask() {
           });
 
           threadId = data.thread_id;
+          _lastFeedbackCtx = {
+            question: q,
+            answer: data.answer,
+            questionType: data.question_type,
+          };
           metaType.textContent = TYPE_LABELS[data.question_type] || data.question_type || "—";
           metaIter.textContent = `검토 ${data.iteration_count}회`;
           answerBody.innerHTML = renderMarkdown(data.answer)
             + renderSuggestions(data.suggestions)
-            + renderSources(data.sources || []);
+            + renderSources(data.sources || [])
+            + renderFeedbackUI();
           answerSection.style.display = "block";
           answerSection.scrollIntoView({ behavior: "smooth", block: "start" });
         } else if (data.type === "error") {
@@ -375,6 +382,85 @@ async function ask() {
   } finally {
     askBtn.disabled = false;
     askBtn.innerHTML = "질문하기";
+  }
+}
+
+// ── 피드백 UI ─────────────────────────────────────────────────────────────────
+function renderFeedbackUI() {
+  return `
+  <div class="feedback-bar" id="feedbackBar">
+    <span class="feedback-label">답변이 도움이 됐나요?</span>
+    <button class="feedback-btn like" id="btnLike" onclick="onFeedbackLike()">👍 좋아요</button>
+    <button class="feedback-btn dislike" id="btnDislike" onclick="onFeedbackDislike()">👎 싫어요</button>
+  </div>
+  <div class="feedback-form" id="feedbackForm">
+    <label>어떤 점이 아쉬웠나요?</label>
+    <textarea class="feedback-textarea" id="feedbackText"
+      placeholder="예) 관련 사업 사례가 빠졌어요 / 답변이 너무 일반적이에요 / 출처가 맞지 않아요"></textarea>
+    <div class="feedback-form-actions">
+      <button class="feedback-submit" onclick="submitDislike()">피드백 전송</button>
+      <button class="feedback-cancel" onclick="cancelFeedback()">취소</button>
+    </div>
+  </div>
+  <div class="feedback-done" id="feedbackDone"></div>`;
+}
+
+function onFeedbackLike() {
+  const bar = document.getElementById("feedbackBar");
+  if (!bar) return;
+  document.getElementById("btnLike").classList.add("selected-like");
+  document.getElementById("btnDislike").disabled = true;
+  document.getElementById("feedbackForm").classList.remove("open");
+  sendFeedback("like", "");
+}
+
+function onFeedbackDislike() {
+  const form = document.getElementById("feedbackForm");
+  if (!form) return;
+  document.getElementById("btnDislike").classList.add("selected-dislike");
+  document.getElementById("btnLike").disabled = true;
+  form.classList.add("open");
+  document.getElementById("feedbackText").focus();
+}
+
+function cancelFeedback() {
+  document.getElementById("feedbackForm").classList.remove("open");
+  document.getElementById("btnDislike").classList.remove("selected-dislike");
+  document.getElementById("btnLike").disabled = false;
+}
+
+async function submitDislike() {
+  const text = (document.getElementById("feedbackText")?.value || "").trim();
+  await sendFeedback("dislike", text);
+}
+
+async function sendFeedback(rating, feedbackText) {
+  const done = document.getElementById("feedbackDone");
+  try {
+    await fetch("/api/feedback", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        thread_id: threadId,
+        question: _lastFeedbackCtx.question,
+        answer: _lastFeedbackCtx.answer,
+        question_type: _lastFeedbackCtx.questionType,
+        rating,
+        feedback_text: feedbackText,
+      }),
+    });
+    document.getElementById("feedbackForm")?.classList.remove("open");
+    document.getElementById("feedbackBar").style.pointerEvents = "none";
+    if (done) {
+      done.textContent = rating === "like"
+        ? "✓ 피드백 감사합니다!"
+        : feedbackText
+          ? "✓ 피드백이 저장됐습니다. 개선에 반영하겠습니다."
+          : "✓ 피드백 감사합니다.";
+      done.classList.add("show");
+    }
+  } catch (e) {
+    if (done) { done.textContent = "피드백 저장 실패"; done.classList.add("show"); }
   }
 }
 

@@ -162,6 +162,41 @@ async def stream(req: QueryRequest):
     return StreamingResponse(event_gen(), media_type="text/event-stream")
 
 
+class FeedbackRequest(BaseModel):
+    thread_id: str | None = None
+    question: str
+    answer: str
+    question_type: str | None = None
+    rating: str
+    feedback_text: str = ""
+
+
+@app.post("/api/feedback")
+async def save_feedback(req: FeedbackRequest):
+    """좋아요/싫어요 피드백 저장 → data/feedback/feedback.jsonl"""
+    import uuid
+    from datetime import datetime, timezone
+
+    feedback_dir = ROOT / "data" / "feedback"
+    feedback_dir.mkdir(parents=True, exist_ok=True)
+    feedback_path = feedback_dir / "feedback.jsonl"
+
+    record = {
+        "id": str(uuid.uuid4()),
+        "timestamp": datetime.now(timezone.utc).isoformat(),
+        "thread_id": req.thread_id,
+        "question": req.question,
+        "answer": req.answer,
+        "question_type": req.question_type,
+        "rating": req.rating,
+        "feedback_text": req.feedback_text,
+    }
+    with feedback_path.open("a", encoding="utf-8") as f:
+        f.write(_json.dumps(record, ensure_ascii=False) + "\n")
+
+    return JSONResponse({"success": True})
+
+
 @app.get("/api/announcements")
 async def get_announcements(
     q: str = "",
@@ -551,4 +586,4 @@ async def rfp_match(req: RFPMatchRequest):
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run(app, host="127.0.0.1", port=8765)
+    uvicorn.run(app, host="0.0.0.0", port=8765)
